@@ -1,0 +1,58 @@
+service: TodoServerlessProject
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: Dev
+  region: us-east-1
+  deploymentMethod: direct
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource:
+        - arn:aws:dynamodb:us-east-1:992382648846:table/TodoTable
+
+functions:
+  AddToDo:
+    handler: api/addToDo.addToDo
+    description: Add todo items to the dynamodb
+    events:
+      - http:
+          path: /addtodo
+          method: post
+  FetchToDos:
+    handler: api/fetchToDos.fetchToDos
+    description: Fetch all the records from db
+    events:
+      - http:
+          path: /fetchtodos
+          method: get
+  FetchToDo:
+    handler: api/fetchToDo.fetchToDo
+    description: Fetch only particular record form the db based on id
+    events:
+      - http:
+          path: /fetchtodo/{id}
+          method: get
+  UpdateToDo:
+    handler: api/updateToDo.updateToDo
+    description: Update an todo item in db based on id
+    events:
+      - http:
+          path: /updateToDo/{id}
+          method: put
+resources:
+  Resources:
+    TodoTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TodoTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
